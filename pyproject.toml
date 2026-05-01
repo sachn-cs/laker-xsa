@@ -87,9 +87,11 @@ disable = [
     "missing-module-docstring",
     "too-few-public-methods",
     "too-many-arguments",
+    "too-many-positional-arguments",
     "too-many-locals",
     "too-many-instance-attributes",
     "invalid-name",
+    "duplicate-code",
 ]
 
 [tool.pytest.ini_options]

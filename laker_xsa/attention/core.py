@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Tuple, cast
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from laker_xsa.config import XSA_LAKER_Config
 
@@ -94,6 +94,7 @@ class QKVProjection(nn.Module):
         self.w_v = nn.Linear(d_model, d_model, bias=False)
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Project input to Q, K, V tensors."""
         return self.w_q(x), self.w_k(x), self.w_v(x)
 
 
@@ -151,6 +152,7 @@ class BaseMultiHeadAttention(nn.Module, ABC):
     def forward(
         self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
     ) -> torch.Tensor:
+        """Forward pass: project, compute attention, and output projection."""
         self.validate_input(x)
 
         q_raw, k_raw, v_raw = self.qkv_proj(x)

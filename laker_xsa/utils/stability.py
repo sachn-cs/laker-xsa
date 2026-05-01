@@ -64,7 +64,7 @@ def clamp_tensor(
     x: torch.Tensor,
     min_val: Optional[float] = None,
     max_val: Optional[float] = None,
-    name: str = "tensor",
+    name: str = "tensor",  # pylint: disable=unused-argument
 ) -> torch.Tensor:
     """
     Clamp tensor values to a specified range.

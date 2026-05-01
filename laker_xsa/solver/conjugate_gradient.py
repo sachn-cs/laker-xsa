@@ -70,7 +70,7 @@ def pcg_solve(
     Returns:
         Solution alpha: (batch, num_heads, n, head_dim).
     """
-    batch, num_heads, n, head_dim = b.shape
+    _batch, _num_heads, _n, _head_dim = b.shape
 
     # Initial guess
     if x0 is not None:

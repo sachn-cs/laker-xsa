@@ -13,7 +13,7 @@ from __future__ import annotations
 from typing import Literal, Optional
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from laker_xsa.config import XSA_LAKER_Config

@@ -50,14 +50,16 @@ def benchmark_attention(
     for _ in range(warmup_runs):
         _ = attn_module(x)
 
-    torch.cuda.synchronize() if torch.cuda.is_available() else None
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
 
     # Forward pass timing
     start = time.perf_counter()
     for _ in range(num_runs):
         with torch.no_grad():
             _ = attn_module(x)
-    torch.cuda.synchronize() if torch.cuda.is_available() else None
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
     forward_time = (time.perf_counter() - start) / num_runs * 1000  # ms
 
     # Backward pass timing
@@ -67,7 +69,8 @@ def benchmark_attention(
         out = attn_module(x)
         out.sum().backward()
         x.grad = None
-    torch.cuda.synchronize() if torch.cuda.is_available() else None
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
     backward_time = (time.perf_counter() - start) / num_runs * 1000  # ms
 
     # Memory (approximate)
@@ -213,7 +216,7 @@ def main() -> None:
     )
 
     # Save results
-    with open(args.output, "w") as f:
+    with open(args.output, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
     print(f"\nResults saved to: {args.output}")
 

@@ -126,15 +126,15 @@ class XSA_LAKER_Config:
             )
 
         if self.pcg_max_iterations < 1:
-            raise ValueError(f"pcg_max_iterations must be >= 1")
+            raise ValueError("pcg_max_iterations must be >= 1")
         if self.num_iterations < 1:
-            raise ValueError(f"num_iterations must be >= 1")
+            raise ValueError("num_iterations must be >= 1")
         if self.dropout < 0.0 or self.dropout > 1.0:
-            raise ValueError(f"dropout must be in [0,1]")
+            raise ValueError("dropout must be in [0,1]")
         if self.eps <= 0:
-            raise ValueError(f"eps must be positive")
+            raise ValueError("eps must be positive")
         if self.lambda_init < 0:
-            raise ValueError(f"lambda_init must be non-negative")
+            raise ValueError("lambda_init must be non-negative")
 
     @property
     def effective_pcg_iters(self) -> int:
