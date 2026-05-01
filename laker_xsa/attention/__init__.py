@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-"""Attention module for LAKER-XSA.
-
-Provides:
-  - StandardMultiHeadAttention (baseline)
-  - ExclusiveSelfAttention (XSA)
-  - LakerAttention — breakthrough fused XSA+LAKER (v2)
-  - LakerAttentionLayer — for Transformer block integration
-  - Deprecated v1 classes (KernelAttentionRegression, FusedXSALAKERAttention)
-
-Core utilities are in core.py; kernel functions in kernels.py.
-"""
+# Attention module for LAKER-XSA.
+#
+# Provides:
+#   - StandardMultiHeadAttention (baseline)
+#   - ExclusiveSelfAttention (XSA)
+#   - LakerAttention — breakthrough fused XSA+LAKER (v2)
+#   - LakerAttentionLayer — for Transformer block integration
+#   - Deprecated v1 classes (KernelAttentionRegression, FusedXSALAKERAttention)
+#
+# Core utilities are in core.py; kernel functions in kernels.py.
 
 from laker_xsa.attention.core import (
     BaseMultiHeadAttention,
@@ -23,7 +22,8 @@ from laker_xsa.attention.core import (
 )
 from laker_xsa.attention.standard import StandardMultiHeadAttention
 from laker_xsa.attention.xsa import ExclusiveSelfAttention
-from laker_xsa.attention.kernels import AttentionKernel, compute_kernel_matrix
+from laker_xsa.attention.kernels import AttentionKernel
+from laker_xsa.attention.functional import compute_kernel_matrix
 from laker_xsa.attention.laker import LakerAttention, LakerAttentionLayer
 from laker_xsa.attention._legacy import (
     FusedXSALAKERAttention,

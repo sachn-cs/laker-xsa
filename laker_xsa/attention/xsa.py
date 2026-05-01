@@ -15,7 +15,7 @@ import math
 from typing import Optional, Protocol
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from laker_xsa.config import XSA_LAKER_Config
@@ -45,7 +45,7 @@ class XSAStrategy(Protocol):
         Returns:
             XSA-modified output (batch, num_heads, seq, head_dim).
         """
-        ...
+        ...  # pylint: disable=unnecessary-ellipsis
 
 
 class XSAProjectionRemoval:
@@ -96,6 +96,7 @@ class XSAZeroDiagonal:
 def build_xsa_strategy(
     mode: str, scale: nn.Parameter, eps: float
 ) -> XSAStrategy:
+    """Factory for XSA exclusion strategies."""
     if mode == "subtract_projection":
         return XSAProjectionRemoval(scale, eps)
     if mode == "zero_diagonal":
@@ -133,7 +134,7 @@ class ExclusiveSelfAttention(BaseMultiHeadAttention):
         self.strategy = build_xsa_strategy(
             config.xsa_mode, self.xsa_scale, config.eps
         )
-        self.uses_diagonal_zeroing = (config.xsa_mode == "zero_diagonal")
+        self.uses_diagonal_zeroing = config.xsa_mode == "zero_diagonal"
 
     def compute_attention(
         self,

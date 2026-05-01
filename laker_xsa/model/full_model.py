@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Literal, Optional
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from laker_xsa.config import XSA_LAKER_Config
 from laker_xsa.model.transformer_block import XSALAKERTransformerBlock

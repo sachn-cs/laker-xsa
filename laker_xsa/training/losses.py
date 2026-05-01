@@ -76,5 +76,4 @@ def label_smoothing_cross_entropy(
     # Apply mask and average
     if mask.any():
         return loss[mask].mean()
-    else:
-        return loss.mean()
+    return loss.mean()

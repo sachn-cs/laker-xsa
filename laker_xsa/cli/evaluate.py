@@ -67,13 +67,13 @@ def main() -> None:
     model = model.to(device)
     model.eval()
 
-    print(f"Model loaded successfully")
+    print("Model loaded successfully")
     print(f"  d_model: {config.d_model}")
     print(f"  num_heads: {config.num_heads}")
     print(f"  num_layers: {checkpoint.get('num_layers', 6)}")
 
     # Run inference on random input
-    print(f"\nRunning inference on random input...")
+    print("\nRunning inference on random input...")
     with torch.no_grad():
         x = torch.randint(
             0, checkpoint.get("vocab_size", 1000),

@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-"""
-Utility functions for LAKER-XSA.
-
-This package provides tensor operations, stability utilities, and
-random seed management.
-"""
+# Utility functions for LAKER-XSA.
+#
+# This package provides tensor operations, stability utilities, and
+# random seed management.
 
 from laker_xsa.utils.tensor_ops import (
     create_causal_mask,

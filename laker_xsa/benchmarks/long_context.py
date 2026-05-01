@@ -11,11 +11,9 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from laker_xsa.config import XSA_LAKER_Config
-
-logger = logging.getLogger(__name__)
 from laker_xsa.attention import (
     ExclusiveSelfAttention,
     StandardMultiHeadAttention,
@@ -24,6 +22,8 @@ from laker_xsa.attention._legacy import (
     FusedXSALAKERAttention,
     KernelAttentionRegression,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_long_context_task(

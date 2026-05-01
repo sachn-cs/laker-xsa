@@ -11,7 +11,7 @@ import time
 from typing import Any, Dict, List, Optional
 
 import torch
-import torch.nn as nn
+from torch import nn
 
 from laker_xsa.config import XSA_LAKER_Config
 from laker_xsa.attention._legacy import FusedXSALAKERAttention
@@ -138,7 +138,7 @@ def profile_iterations(
         kernel_diag = torch.diagonal(kernel, dim1=-2, dim2=-1)
         diag_precond, lr_precond = attn.preconditioner(kernel_diag, seq_len)
 
-        lambda_reg = torch.nn.functional.softplus(attn.lambda_reg) + config.eps
+        lambda_reg = torch.nn.functional.softplus(attn.lambda_reg) + config.eps  # pylint: disable=not-callable
 
         kernel_reg = kernel.clone()
         eye = torch.eye(seq_len, device=device, dtype=kernel.dtype)
@@ -150,7 +150,7 @@ def profile_iterations(
         alpha = torch.zeros_like(v)
         residuals: List[float] = []
 
-        for i in range(max_iterations):
+        for _ in range(max_iterations):
             k_alpha = torch.matmul(kernel_reg, alpha)
             residual = v - k_alpha
             res_norm = residual.norm().item()

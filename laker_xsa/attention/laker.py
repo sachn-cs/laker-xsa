@@ -23,7 +23,7 @@ import math
 from typing import Optional
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from laker_xsa.config import XSA_LAKER_Config
@@ -88,13 +88,15 @@ class LakerAttention(BaseMultiHeadAttention):
         self.init_weights()
 
     def init_weights(self) -> None:
+        """Initialize attention projection weights."""
         std = 0.02 / math.sqrt(2.0)
         for proj in [self.qkv_proj.w_q, self.qkv_proj.w_k, self.qkv_proj.w_v, self.w_o]:
             nn.init.normal_(proj.weight, mean=0.0, std=std)
 
     @property
     def lambda_reg(self) -> torch.Tensor:
-        return F.softplus(self.raw_lambda) + self.config.eps
+        """Return SPD-guaranteed regularization (softplus parameterized)."""
+        return F.softplus(self.raw_lambda) + self.config.eps  # pylint: disable=not-callable
 
     def zero_diagonal(self, kernel: torch.Tensor) -> torch.Tensor:
         """Zero the kernel diagonal: K_{ii} = 0 for all i (XSA)."""
@@ -112,6 +114,7 @@ class LakerAttention(BaseMultiHeadAttention):
         return output - self.xsa_scale * (dot / v_norm_sq) * values
 
     def rms_normalize(self, x: torch.Tensor) -> torch.Tensor:
+        """Root-mean-square normalization for multi-layer stability."""
         rms = torch.sqrt(
             (x * x).mean(dim=(-2, -1), keepdim=True) + self.config.eps
         )
@@ -175,7 +178,7 @@ class LakerAttention(BaseMultiHeadAttention):
             eye = torch.eye(seq_len, device=kernel.device, dtype=kernel.dtype)
             eye = eye.view(1, 1, seq_len, seq_len)
             kernel_reg = kernel + lam * eye
-            alpha = torch.linalg.solve(kernel_reg, v)
+            alpha = torch.linalg.solve(kernel_reg, v)  # pylint: disable=not-callable
 
         # Stabilize output scale for multi-layer stacking
         alpha = stable_clip(alpha)
@@ -213,4 +216,5 @@ class LakerAttentionLayer(nn.Module):
         x: torch.Tensor,
         mask: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
+        """Forward pass through LakerAttentionLayer."""
         return self.attention(x, mask)

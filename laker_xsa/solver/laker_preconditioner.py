@@ -21,7 +21,7 @@ from __future__ import annotations
 from typing import Optional, Tuple
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 
@@ -137,7 +137,7 @@ class LakerPreconditioner(nn.Module):
             u = Kz + lambda_reg * z
 
             # Normalize to unit vector
-            u_norm = torch.linalg.vector_norm(u, dim=-2, keepdim=True)
+            u_norm = torch.linalg.vector_norm(u, dim=-2, keepdim=True)  # pylint: disable=not-callable
             ubar = u / (u_norm + self.eps_safeguard)
 
             ubar_list.append(ubar.squeeze(-1))
@@ -179,7 +179,7 @@ class LakerPreconditioner(nn.Module):
 
         # Compute Sigma^{-1} via batched inverse
         # For n up to ~1024 this is manageable
-        Sigma_inv = torch.linalg.inv(Sigma)
+        Sigma_inv = torch.linalg.inv(Sigma)  # pylint: disable=not-callable
 
         # Denominator term: ubar_k^T @ Sigma^{-1} @ ubar_k
         denom_sum = torch.zeros(batch, num_heads, n, n, device=device, dtype=dtype)
@@ -229,7 +229,8 @@ class LakerPreconditioner(nn.Module):
         ubar_samples = self.generate_angular_samples(kernel, lambda_reg)
 
         # Initialize Sigma = I
-        Sigma = torch.eye(n, device=device, dtype=dtype).unsqueeze(0).unsqueeze(0).expand(batch, num_heads, -1, -1).clone()
+        eye = torch.eye(n, device=device, dtype=dtype)
+        Sigma = eye.unsqueeze(0).unsqueeze(0).expand(batch, num_heads, -1, -1).clone()
 
         # CCCP fixed-point iterations
         for _ in range(self.max_cccp_iters):
@@ -237,7 +238,7 @@ class LakerPreconditioner(nn.Module):
             Sigma = Sigma_new
 
         # Extract P = Sigma^{-1/2} via eigendecomposition
-        eigenvalues, eigenvectors = torch.linalg.eigh(Sigma)
+        eigenvalues, eigenvectors = torch.linalg.eigh(Sigma)  # pylint: disable=not-callable
 
         # Clamp eigenvalues for numerical stability
         eigenvalues = torch.clamp(eigenvalues, min=self.eps)
@@ -273,7 +274,7 @@ class LakerPreconditioner(nn.Module):
         # Diagonal part: use kernel diagonal + lambda for scaling
         kernel_diag = torch.diagonal(kernel, dim1=-2, dim2=-1)
         # softplus ensures positivity, important for preconditioner quality
-        diag = F.softplus(kernel_diag + lambda_reg.squeeze(-1).squeeze(-1))
+        diag = F.softplus(kernel_diag + lambda_reg.squeeze(-1).squeeze(-1))  # pylint: disable=not-callable
         diag = diag * self.diag_scale.abs() + self.eps
 
         # Low-rank factor
@@ -283,7 +284,7 @@ class LakerPreconditioner(nn.Module):
             lr_pos = self.lr_base[:, :seq_len, :]
 
             # Apply learned importance per rank component
-            importance = F.softplus(self.lr_importance)
+            importance = F.softplus(self.lr_importance)  # pylint: disable=not-callable
 
             # Scale basis by importance
             lr_scaled = lr_pos * importance.unsqueeze(1)
@@ -300,7 +301,7 @@ class LakerPreconditioner(nn.Module):
     ) -> torch.Tensor:
         """Jacobi-style diagonal preconditioner."""
         kernel_diag = torch.diagonal(kernel, dim1=-2, dim2=-1)
-        diag = F.softplus(kernel_diag + lambda_reg.squeeze(-1).squeeze(-1))
+        diag = F.softplus(kernel_diag + lambda_reg.squeeze(-1).squeeze(-1))  # pylint: disable=not-callable
         return diag * self.diag_scale.abs() + self.eps
 
     def compute_preconditioner(
@@ -337,17 +338,16 @@ class LakerPreconditioner(nn.Module):
                 self.cached_preconditioner = (P,)
             return self.cached_preconditioner[0]
 
-        elif self.mode == "fast":
+        if self.mode == "fast":
             if should_update or self.cached_preconditioner is None:
                 diag, lr = self.fast_preconditioner(kernel, lambda_reg, seq_len)
                 self.cached_preconditioner = (diag, lr)
             return self.cached_preconditioner
 
-        elif self.mode == "diagonal":
+        if self.mode == "diagonal":
             return self.diagonal_preconditioner(kernel, lambda_reg)
 
-        else:
-            return None
+        return None
 
     def apply_preconditioner(
         self,
@@ -372,7 +372,7 @@ class LakerPreconditioner(nn.Module):
             P = precond_data
             return torch.matmul(P, residual)
 
-        elif self.mode == "fast":
+        if self.mode == "fast":
             diag, lr_factor = precond_data
             # Diagonal: element-wise
             out = residual * diag.unsqueeze(-1)
@@ -382,7 +382,7 @@ class LakerPreconditioner(nn.Module):
                 out = out + torch.matmul(lr_factor, UT_r)
             return out
 
-        elif self.mode == "diagonal":
+        if self.mode == "diagonal":
             return residual * precond_data.unsqueeze(-1)
 
         return residual

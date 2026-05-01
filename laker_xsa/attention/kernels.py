@@ -13,7 +13,7 @@ from __future__ import annotations
 import math
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 
@@ -61,6 +61,7 @@ class AttentionKernel(nn.Module):
 
     @property
     def temperature(self) -> torch.Tensor:
+        """Effective temperature (derived from log_temperature param)."""
         return torch.exp(self.log_temperature).clamp(min=0.05, max=100.0)
 
     def forward(self, q: torch.Tensor, k: torch.Tensor) -> torch.Tensor:
@@ -94,4 +95,4 @@ class AttentionKernel(nn.Module):
         return kernel + self.eps
 
 
-from laker_xsa.attention.functional import compute_kernel_matrix  # noqa: F401 — re-export
+__all__ = ["AttentionKernel"]
