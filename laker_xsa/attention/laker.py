@@ -24,7 +24,7 @@ from typing import Optional, cast
 
 import torch
 from torch import nn
-import torch.nn.functional as F
+from torch.nn.functional import softplus
 
 from laker_xsa.config import XSA_LAKER_Config
 from laker_xsa.attention.core import (
@@ -96,9 +96,8 @@ class LakerAttention(BaseMultiHeadAttention):
     @property
     def lambda_reg(self) -> torch.Tensor:
         """Return SPD-guaranteed regularization (softplus parameterized)."""
-        return (
-            F.softplus(self.raw_lambda) + self.config.eps
-        )  # pylint: disable=not-callable
+        # pylint: disable-next=not-callable
+        return softplus(self.raw_lambda) + self.config.eps
 
     def zero_diagonal(self, kernel: torch.Tensor) -> torch.Tensor:
         """Zero the kernel diagonal: K_{ii} = 0 for all i (XSA)."""

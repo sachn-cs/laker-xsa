@@ -22,7 +22,8 @@ from typing import Optional, Tuple, Union, cast
 
 import torch
 from torch import nn
-import torch.nn.functional as F
+from torch.linalg import eigh, vector_norm
+from torch.nn.functional import softplus
 
 PreconditionerData = Union[
     torch.Tensor, Tuple[torch.Tensor, Optional[torch.Tensor]], None
@@ -140,9 +141,8 @@ class LakerPreconditioner(nn.Module):
             u = Kz + lambda_reg * z
 
             # Normalize to unit vector
-            u_norm = torch.linalg.vector_norm(
-                u, dim=-2, keepdim=True
-            )  # pylint: disable=not-callable
+            # pylint: disable-next=not-callable
+            u_norm = vector_norm(u, dim=-2, keepdim=True)
             ubar = u / (u_norm + self.eps_safeguard)
 
             ubar_list.append(ubar.squeeze(-1))
@@ -251,9 +251,7 @@ class LakerPreconditioner(nn.Module):
             Sigma = Sigma_new
 
         # Extract P = Sigma^{-1/2} via eigendecomposition
-        eigenvalues, eigenvectors = torch.linalg.eigh(
-            Sigma
-        )  # pylint: disable=not-callable
+        eigenvalues, eigenvectors = eigh(Sigma)  # pylint: disable=not-callable
 
         # Clamp eigenvalues for numerical stability
         eigenvalues = torch.clamp(eigenvalues, min=self.eps)
@@ -289,9 +287,8 @@ class LakerPreconditioner(nn.Module):
         # Diagonal part: use kernel diagonal + lambda for scaling
         kernel_diag = torch.diagonal(kernel, dim1=-2, dim2=-1)
         # softplus ensures positivity, important for preconditioner quality
-        diag = F.softplus(
-            kernel_diag + lambda_reg.squeeze(-1).squeeze(-1)
-        )  # pylint: disable=not-callable
+        # pylint: disable-next=not-callable
+        diag = softplus(kernel_diag + lambda_reg.squeeze(-1).squeeze(-1))
         diag = diag * self.diag_scale.abs() + self.eps
 
         # Low-rank factor
@@ -301,7 +298,7 @@ class LakerPreconditioner(nn.Module):
             lr_pos = self.lr_base[:, :seq_len, :]
 
             # Apply learned importance per rank component
-            importance = F.softplus(self.lr_importance)  # pylint: disable=not-callable
+            importance = softplus(self.lr_importance)  # pylint: disable=not-callable
 
             # Scale basis by importance
             lr_scaled = lr_pos * importance.unsqueeze(1)
@@ -318,9 +315,8 @@ class LakerPreconditioner(nn.Module):
     ) -> PreconditionerData:
         """Jacobi-style diagonal preconditioner."""
         kernel_diag = torch.diagonal(kernel, dim1=-2, dim2=-1)
-        diag = F.softplus(
-            kernel_diag + lambda_reg.squeeze(-1).squeeze(-1)
-        )  # pylint: disable=not-callable
+        # pylint: disable-next=not-callable
+        diag = softplus(kernel_diag + lambda_reg.squeeze(-1).squeeze(-1))
         return diag * self.diag_scale.abs() + self.eps
 
     def compute_preconditioner(
