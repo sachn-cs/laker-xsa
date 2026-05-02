@@ -12,7 +12,7 @@ from typing import Optional, Tuple
 
 import torch
 from torch import nn
-import torch.nn.functional as F
+from torch.nn.functional import softplus
 
 from laker_xsa.config import XSA_LAKER_Config
 
@@ -98,9 +98,8 @@ class LearnedPreconditioner(nn.Module):
         batch = kernel_diag.shape[0]
 
         # Diagonal from kernel diagonal + learned scale
-        diag_precond = (
-            F.softplus(kernel_diag) * self.diag_scale + self.reg
-        )  # pylint: disable=not-callable
+        # pylint: disable-next=not-callable
+        diag_precond = softplus(kernel_diag) * self.diag_scale + self.reg
 
         # Low-rank factor
         lr_precond: Optional[torch.Tensor] = None
